@@ -1,4 +1,5 @@
 import express from 'express';
+import { Response, Request } from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
@@ -30,7 +31,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   // GET /filteredimage?image_url={{URL}}
-  app.get("/filteredimage", async (req, res) => {
+  app.get("/filteredimage", async (req: Request, res:Response) => {
     let image_url = req.query.image_url.toString();
 
     if(!image_url){
@@ -43,9 +44,14 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     if(filteredImage===undefined||filteredImage===null)
       return res.status(401).send(`Unable to filter image`);
     else{
+      try {
       res.status(200).sendFile(filteredImage, () => {
         deleteLocalFiles([filteredImage])
-      });
+      });}
+      catch(err){
+        res.status(422).send("Error to filter Image")
+      }
+
     }
 
   })
@@ -54,7 +60,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
+  app.get( "/", async ( req: Request, res: Response ) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
   
