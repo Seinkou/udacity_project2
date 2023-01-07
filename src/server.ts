@@ -40,13 +40,15 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     }
 
     // Function to checks the validity of a URL, We use Regex     
+    
     function isValidURL(str: string) {
       if(/^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g.test(str)) {
            return 'YES';
        } else {
            return 'NO';
        }
-   }
+   } 
+
    let valide = isValidURL(image_url);
     if(valide == 'NO')
       res.status(401).send('Inavlid url! please Check URL again');
