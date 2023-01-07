@@ -1,4 +1,5 @@
 import express from 'express';
+import {Request, Response} from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
@@ -29,27 +30,42 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
+   // GET /filteredimage?image_url={{URL}}
   // GET /filteredimage?image_url={{URL}}
   app.get("/filteredimage", async (req, res) => {
-    let image_url = req.query.image_url.toString();
+    const image_url = req.query.image_url.toString();
 
     if(!image_url){
       res.status(400).send('URL is required');
     }
 
-    //Process Image
-    const filteredImage:string =await filterImageFromURL(image_url);
-    console.log(filteredImage);
-    if(filteredImage===undefined||filteredImage===null)
-      return res.status(401).send(`Unable to filter image`);
+    // Function to checks the validity of a URL, We use Regex     
+    function isValidURL(str: string) {
+      if(/^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g.test(str)) {
+           return 'YES';
+       } else {
+           return 'NO';
+       }
+   }
+   let valide = isValidURL(image_url);
+    if(valide == 'NO')
+      res.status(401).send('Inavlid url! please Check URL again');
     else{
-      res.status(200).sendFile(filteredImage, () => {
-        deleteLocalFiles([filteredImage])
-      });
+    //Process Image
+      const filteredImage:string =await filterImageFromURL(image_url);
+      console.log(filteredImage);
+      if(filteredImage===undefined||filteredImage===null)
+        return res.status(401).send(`Unable to filter image`);
+      else{
+        res.status(200).sendFile(filteredImage, () => {
+          deleteLocalFiles([filteredImage])
+        });
+
+      }
     }
 
-  })
 
+   })
   //! END @TODO1
   
   // Root Endpoint
@@ -65,3 +81,8 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
       console.log( `press CTRL+C to stop server` );
   } );
 })();
+
+/*
+  Reference : https://snyk.io/blog/secure-javascript-url-validation/#:~:text=Another%20way%20to%20validate%20a,)%20%7B%20var%20res%20%3D%20string.
+            : https://github.com/mshivam76/image-filter-starter-code/blob/master/src/server.ts
+*/
